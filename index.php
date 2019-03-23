@@ -1,74 +1,36 @@
 <?php 
-	/*Get Data From POST Http Request*/
-	$datas = file_get_contents('php://input');
-	/*Decode Json From LINE Data Body*/
-	$deCode = json_decode($datas,true);
-
-	file_put_contents('log.txt', file_get_contents('php://input') . PHP_EOL, FILE_APPEND);
-
-	$replyToken = $deCode['events'][0]['replyToken'];
-
-	$messages = [];
-	$messages['replyToken'] = $replyToken;
-	$messages['messages'][0] = getFormatTextMessage("เอ้ย ถามอะไรก็ตอบได้");
-
-	$encodeJson = json_encode($messages);
-
-	$LINEDatas['url'] = "https://api.line.me/v2/bot/message/reply";
-  	$LINEDatas['token'] = "QUJ5fI+IEiuCd0Dtg9b1ZlsBLjHIprlu4U8nkoM62W3qTI1DnDH4q+mD4F8NUOn9ui6gdXJ5pydc6mM0WwuBx0+hlhZE6+7Ra0IkBUD3Vq9Ui4Ezh6A7Y7Ek8WjjbM0wEJnDls7nEvDsVMtQV/JEuwdB04t89/1O/w1cDnyilFU=";
-
-  	$results = sentMessage($encodeJson,$LINEDatas);
-
-	/*Return HTTP Request 200*/
-	http_response_code(200);
-
-	function getFormatTextMessage($text)
-	{
-		$datas = [];
-		$datas['type'] = 'text';
-		$datas['text'] = $text;
-
-		return $datas;
-	}
-
-	function sentMessage($encodeJson,$datas)
-	{
-		$datasReturn = [];
-		$curl = curl_init();
-		curl_setopt_array($curl, array(
-		  CURLOPT_URL => $datas['url'],
-		  CURLOPT_RETURNTRANSFER => true,
-		  CURLOPT_ENCODING => "",
-		  CURLOPT_MAXREDIRS => 10,
-		  CURLOPT_TIMEOUT => 30,
-		  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		  CURLOPT_CUSTOMREQUEST => "POST",
-		  CURLOPT_POSTFIELDS => $encodeJson,
-		  CURLOPT_HTTPHEADER => array(
-		    "authorization: Bearer ".$datas['token'],
-		    "cache-control: no-cache",
-		    "content-type: application/json; charset=UTF-8",
-		  ),
-		));
-
-		$response = curl_exec($curl);
-		$err = curl_error($curl);
-
-		curl_close($curl);
-
-		if ($err) {
-		    $datasReturn['result'] = 'E';
-		    $datasReturn['message'] = $err;
-		} else {
-		    if($response == "{}"){
-			$datasReturn['result'] = 'S';
-			$datasReturn['message'] = 'Success';
-		    }else{
-			$datasReturn['result'] = 'E';
-			$datasReturn['message'] = $response;
-		    }
-		}
-
-		return $datasReturn;
-	}
+	$accessToken = "QUJ5fI+IEiuCd0Dtg9b1ZlsBLjHIprlu4U8nkoM62W3qTI1DnDH4q+mD4F8NUOn9ui6gdXJ5pydc6mM0WwuBx0+hlhZE6+7Ra0IkBUD3Vq9Ui4Ezh6A7Y7Ek8WjjbM0wEJnDls7nEvDsVMtQV/JEuwdB04t89/1O/w1cDnyilFU=";//copy ข้อความ Channel access token ตอนที่ตั้งค่า
+   $content = file_get_contents('php://input');
+   $arrayJson = json_decode($content, true);
+   $arrayHeader = array();
+   $arrayHeader[] = "Content-Type: application/json";
+   $arrayHeader[] = "Authorization: Bearer {$accessToken}";
+   //รับข้อความจากผู้ใช้
+   $message = $arrayJson['events'][0]['message']['text'];
+   //รับ id ของผู้ใช้
+   $id = $arrayJson['events'][0]['source']['userId'];
+   #ตัวอย่าง Message Type "Text + Sticker"
+   if($message == "สวัสดี"){
+      $arrayPostData['to'] = $id;
+      $arrayPostData['messages'][0]['type'] = "text";
+      $arrayPostData['messages'][0]['text'] = "สวัสดีจ้าาา";
+      $arrayPostData['messages'][1]['type'] = "sticker";
+      $arrayPostData['messages'][1]['packageId'] = "2";
+      $arrayPostData['messages'][1]['stickerId'] = "34";
+      pushMsg($arrayHeader,$arrayPostData);
+   }
+   function pushMsg($arrayHeader,$arrayPostData){
+      $strUrl = "https://api.line.me/v2/bot/message/push";
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL,$strUrl);
+      curl_setopt($ch, CURLOPT_HEADER, false);
+      curl_setopt($ch, CURLOPT_POST, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $arrayHeader);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($arrayPostData));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      $result = curl_exec($ch);
+      curl_close ($ch);
+   }
+   exit;
 ?>
