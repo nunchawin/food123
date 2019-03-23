@@ -1,4 +1,6 @@
+hi
 <?php
+
 $accessToken = "QUJ5fI+IEiuCd0Dtg9b1ZlsBLjHIprlu4U8nkoM62W3qTI1DnDH4q+mD4F8NUOn9ui6gdXJ5pydc6mM0WwuBx0+hlhZE6+7Ra0IkBUD3Vq9Ui4Ezh6A7Y7Ek8WjjbM0wEJnDls7nEvDsVMtQV/JEuwdB04t89/1O/w1cDnyilFU=
 ";//copy ข้อความ Channel access token ตอนที่ตั้งค่า
    $content = file_get_contents('php://input');
